@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ngo_app/authentication.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import './dialogBox.dart';
 
 class LoginRegisterPage extends StatefulWidget {
@@ -14,44 +16,130 @@ class LoginRegisterPage extends StatefulWidget {
 enum FormType { login, register }
 
 class _LoginRegisterPageState extends State<LoginRegisterPage> {
-
-  DialogBox dialogBox=DialogBox();
+  DialogBox dialogBox = DialogBox();
 
   final formKey = new GlobalKey<FormState>();
   FormType _formType = FormType.login;
   String _email = "";
   String _password = "";
+  String _name="";
+  String _address="";
+  String _type='';
+  String _apiKey='';
+  String uid;
+  final FirebaseAuth auth=FirebaseAuth.instance;
+  Future<String> inputData() async {
+    final FirebaseUser user = await auth.currentUser();
+    return(user.uid);
+    // here you write the codes to input the data into firestore
+  }
 
   List<Widget> createInputs() {
-    return [
-      SizedBox(
-        height: 10.0,
-      ),
-      logo(),
-      SizedBox(
-        height: 20,
-      ),
-      TextFormField(
-        decoration: InputDecoration(labelText: 'E-mail'),
-        validator: (value) {
-          return value.isEmpty ? 'E-mail is required' : null;
-        },
-        onSaved: (value) {
-          return _email = value;
-        },
-      ),
-      TextFormField(
-        decoration: InputDecoration(labelText: 'Password'),
-        obscureText: true,
-        validator: (value) {
-          return value.isEmpty ? 'Password is required' : null;
-        },
-        onSaved: (value) {
-          return _password = value;
-        },
-      ),
-      SizedBox(height: 10)
-    ];
+    if (_formType == FormType.login) {
+      return [
+        SizedBox(
+          height: 10.0,
+        ),
+        logo(),
+        SizedBox(
+          height: 20,
+        ),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'E-mail'),
+          validator: (value) {
+            return value.isEmpty ? 'E-mail is required' : null;
+          },
+          onSaved: (value) {
+            return _email = value;
+          },
+        ),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Password'),
+          obscureText: true,
+          validator: (value) {
+            return value.isEmpty ? 'Password is required' : null;
+          },
+          onSaved: (value) {
+            return _password = value;
+          },
+        ),
+        SizedBox(height: 10)
+      ];
+    } else {
+      return [
+        SizedBox(
+          height: 10.0,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'E-mail'),
+          validator: (value) {
+            return value.isEmpty ? 'E-mail is required' : null;
+          },
+          onSaved: (value) {
+            return _email = value;
+          },
+        ),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Password'),
+          obscureText: true,
+          validator: (value) {
+            return value.isEmpty ? 'Password is required' : null;
+          },
+          onSaved: (value) {
+            return _password = value;
+          },
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Name of NGO'),
+          validator: (value) {
+            return value.isEmpty ? 'Name of NGO is required' : null;
+          },
+          onSaved: (value) {
+            return _name = value;
+          },
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Address, City, State'),
+          validator: (value) {
+            return value.isEmpty ? 'Address is required' : null;
+          },
+          onSaved: (value) {
+            return _address = value;
+          },
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Type of NGO'),
+          validator: (value) {
+            return value.isEmpty ? 'NGO type is required' : null;
+          },
+          onSaved: (value) {
+            return _type = value;
+          },
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          decoration: InputDecoration(labelText: 'Razorpay Account KEY'),
+          validator: (value) {
+            return value.isEmpty ? 'API Key is required' : null;
+          },
+          onSaved: (value) {
+            return _apiKey = value;
+          },
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Create an Account on RazorPay and Enter API key Recieved',
+          style: TextStyle(color: Colors.pink,fontSize:12),
+        ),
+        SizedBox(height: 10),
+      ];
+    }
   }
 
   List<Widget> createButtons() {
@@ -116,27 +204,43 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
     }
   }
 
-  void validateAndSubmit() async{
-    if(validateAndSave()){
-      try{
-        if(_formType==FormType.login){
-          String userId= await widget.auth.SignIn(_email, _password);
-          //dialogBox.information(context, "Congratulations", "Logged In Successfully");
-          print("Login userId= " +userId);
-        }
-        else{
-          String userId= await widget.auth.SignUp(_email, _password);
-          //dialogBox.information(context, "Congratulations", "Your account has been Created Successfully");
-          print("Register userId= " +userId);
+  void validateAndSubmit() async {
+    if (validateAndSave()) {
+      try {
+        if (_formType == FormType.login) {
+          String userId = await widget.auth.SignIn(_email, _password);
+          print("Login userId= " + userId);
+        } else {
+          String userId = await widget.auth.SignUp(_email, _password);
+          print("Register userId= " + userId);
+          uid=await inputData();
+          saveToDatabase(uid,_email,_name,_address,_type,_apiKey);
         }
         widget.onSignedIn();
-      }
-      catch(e){
+      } catch (e) {
         dialogBox.information(context, "Error", e.toString());
-        print("Error = "+e.toString());
+        print("Error = " + e.toString());
       }
     }
-  }  
+  }
+    void saveToDatabase(id,email,name,address,type,apiKey){
+    //var dbTimeKey=DateTime.now();
+    print("id");
+    print(id);
+    DatabaseReference ref=FirebaseDatabase.instance.reference();
+
+    var data = {
+      "id":id,
+      "email":email,
+      "name": name,
+      "address": address,
+      "type":type,
+      "apiKey":apiKey,
+    };
+
+    ref.child("NGO").push().set(data);
+
+  }
 
   void moveToRegister() {
     formKey.currentState.reset();
@@ -163,7 +267,6 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
         child: Form(
           key: formKey,
           child: ListView(
-            //crossAxisAlignment: CrossAxisAlignment.stretch,
             children: createInputs() + createButtons(),
           ),
         ),
