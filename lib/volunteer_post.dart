@@ -8,14 +8,15 @@ import 'dart:io';
 import 'package:ngo_app/home_page.dart';
 import './home_page.dart';
 
-class UploadPhotoPage extends StatefulWidget {
+class VolunteerPhotoPage extends StatefulWidget {
   @override
-  _UploadPhotoPageState createState() => _UploadPhotoPageState();
+  _VolunteerPhotoPageState createState() => _VolunteerPhotoPageState();
 }
 
-class _UploadPhotoPageState extends State<UploadPhotoPage> {
+class _VolunteerPhotoPageState extends State<VolunteerPhotoPage> {
   File sampleImage;
   String _myValue;
+  String _formLink;
   String url;
   final formKey = GlobalKey<FormState>();
 
@@ -69,6 +70,7 @@ class _UploadPhotoPageState extends State<UploadPhotoPage> {
     var data = {
       "image":url,
       "description": _myValue,
+      "link":_formLink,
       "date":date,
       "time":time,
     };
@@ -103,6 +105,15 @@ class _UploadPhotoPageState extends State<UploadPhotoPage> {
                 return _myValue = value;
               },
             ),
+            TextFormField(
+              decoration: InputDecoration(labelText: 'Google Form\'s Link'),
+              validator: (value) {
+                return value.isEmpty ? 'Link is required' : null;
+              },
+              onSaved: (value) {
+                return _formLink = value;
+              },
+            ),
             SizedBox(height:15),
             RaisedButton(
               elevation: 10,
@@ -121,7 +132,7 @@ class _UploadPhotoPageState extends State<UploadPhotoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload Post"),
+        title: Text("Volunteers Requirement Post"),
         centerTitle: true,
       ),
       body: Center(
