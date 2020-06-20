@@ -6,6 +6,7 @@ import './posts.dart';
 import './volunteer_post.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import './upload_transaction.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.auth, this.onSignedOut});
@@ -178,6 +179,17 @@ class _HomePageState extends State<HomePage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => UploadPhotoPage()));
+                },
+              ),
+              IconButton(
+                icon: Icon(Icons.file_upload),
+                iconSize: 30,
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TransactionPhotoPage()));
                 },
               ),
               IconButton(
