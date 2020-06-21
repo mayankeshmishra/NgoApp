@@ -97,6 +97,7 @@ class _TransactionPhotoPageState extends State<TransactionPhotoPage> {
     var data = {
       "image": url,
       "description": _myValue,
+      "amount": _myAmount,
       "date": date,
       "time": time,
       "name": ngoName,
