@@ -189,8 +189,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
       tag: 'Hero',
       child: CircleAvatar(
           backgroundColor: Colors.transparent,
-          radius: 110,
-          child: Icon(Icons.supervised_user_circle)),
+          radius: 90,
+          child: Image.asset('assets/ngologofinal.jpeg'),),
     );
   }
 
